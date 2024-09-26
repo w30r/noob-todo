@@ -2,9 +2,11 @@ import express from "express";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import route from "./routes/todoRoute.js";
+import cors from "cors";
 
 const app = express();
 app.use(bodyParser.json());
+app.use(cors());
 
 const MONGOURL =
   process.env.MONGOURL || "mongodb://localhost:27017/api-noob-todo";
