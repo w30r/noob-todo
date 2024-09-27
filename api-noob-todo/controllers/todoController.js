@@ -55,3 +55,18 @@ export const updateTodoByID = async (req, res) => {
     return res.status(400).json({ message: "Something went wrong", data: err });
   }
 };
+
+export const toggleStatus = async (req, res) => {
+  try {
+    const result = await Todo.findByIdAndUpdate(req.params.id, {
+      isDone: !req.body.isDone,
+    });
+    if (req.body.isDone === undefined) {
+      return res.status(400).json({ message: "isDone is required" });
+    }
+    return res.status(200).json({ result, message: "isDone toggled" });
+  } catch (err) {
+    console.error(err);
+    return res.status(400).json({ message: "Something went wrong", data: err });
+  }
+};

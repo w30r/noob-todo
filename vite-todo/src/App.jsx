@@ -5,12 +5,41 @@ import { TaskCard } from "./components/TaskCard";
 
 function App() {
   const [todo, setTodos] = useState([]);
+  const [newTodoTitle, setNewTodoTitle] = useState("");
+  const apiUrl = import.meta.env.API_URL || "http://localhost:3002/api";
 
   function getTodoTasks() {
     axios
-      .get("http://localhost:3002/api")
+      .get(apiUrl)
       .then((res) => setTodos(res.data))
+      .catch((error) => console.error(error))
+      .finally(() => console.log(todo));
+  }
+
+  function handleDeleteTodo(id) {
+    axios
+      .delete(`${apiUrl}/${id}`)
+      .then(() => getTodoTasks())
       .catch((error) => console.error(error));
+  }
+
+  function handleCreateTodo() {
+    axios
+      .post(apiUrl, {
+        title: newTodoTitle,
+        description: newTodoTitle,
+      })
+      .then(() => getTodoTasks())
+      .catch((error) => console.error(error));
+
+    setNewTodoTitle("");
+  }
+
+  function toggleStatus(id) {
+    axios
+      .put(`${apiUrl}/${id}/toggle`)
+      .then(() => getTodoTasks())
+      .catch((err) => console.error(err));
   }
 
   useEffect(() => {
@@ -26,23 +55,30 @@ function App() {
           type="text"
           placeholder="Enter new task here"
           className="outline-none text-black w-1/2 h-12 rounded-xl border-2 border-black/40 px-8 py-2"
+          onChange={(e) => setNewTodoTitle(e.target.value)}
+          value={newTodoTitle}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleCreateTodo();
+            }
+          }}
         />
         <div id="Tasks" className="flex flex-col w-3/4 gap-5">
-          {todo.map((x) => (
-            <TaskCard
-              key={x._id}
-              title={x.title}
-              description={x.description}
-              created_at={x.created_at}
-              isDone={x.isDone}
-            />
-          ))}
-          {/* <TaskCard
-            title="Create express.js API endpoint"
-            description="This is the description just make it look nice please"
-            created_at="2024-08-03 16:00"
-            isDone={false}
-          /> */}
+          {todo
+            .slice()
+            .reverse()
+            .map((x) => (
+              <TaskCard
+                key={x._id}
+                id={x._id}
+                title={x.title}
+                description={x.description}
+                created_at={x.created_at}
+                isDone={x.isDone}
+                handleDeleteTodo={handleDeleteTodo}
+                toggleStatus={toggleStatus}
+              />
+            ))}
         </div>
       </div>
     </div>
